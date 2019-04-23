@@ -15,7 +15,6 @@ func AddToken(key string, tokenType string) Middleware {
 
       if err == nil {
         ctx := r.Context()
-
         r = r.WithContext(context.WithValue(ctx, key, *token))
 
         next(w, r)
@@ -33,7 +32,6 @@ func RequireToken(key string, tokenType string, errback http.HandlerFunc) Middle
 
       if err == nil {
         ctx := r.Context()
-
         r = r.WithContext(context.WithValue(ctx, key, *token))
 
         next(w, r)

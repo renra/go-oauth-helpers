@@ -10,6 +10,8 @@ import (
   "github.com/stretchr/testify/assert"
 )
 
+const ErrorText = "Error happened"
+
 type TestHttpHandler struct {
 }
 
@@ -35,7 +37,7 @@ func (handler *TestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
       oAuthHelpers.AccessTokenType,
       func (writer http.ResponseWriter, req *http.Request) {
         w.WriteHeader(http.StatusUnauthorized)
-        fmt.Fprintf(w, "")
+        fmt.Fprintf(w, ErrorText)
       },
     )(func (writer http.ResponseWriter, req *http.Request) {
       maybeToken := req.Context().Value(key)
@@ -63,7 +65,7 @@ func (handler *TestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
       oAuthHelpers.RefreshTokenType,
       func (writer http.ResponseWriter, req *http.Request) {
         w.WriteHeader(http.StatusUnauthorized)
-        fmt.Fprintf(w, "")
+        fmt.Fprintf(w, ErrorText)
       },
     )(func (writer http.ResponseWriter, req *http.Request) {
       maybeToken := req.Context().Value(key)
@@ -153,7 +155,7 @@ func (suite *OAuthMiddlewareSuite) TestRequireAccessToken_NoHeaderSent() {
   suite.handler.ServeHTTP(recorder, request)
 
   assert.Equal(suite.T(), http.StatusUnauthorized, recorder.Code)
-  assert.Equal(suite.T(), "", recorder.Body.String())
+  assert.Equal(suite.T(), ErrorText, recorder.Body.String())
 }
 
 func (suite *OAuthMiddlewareSuite) TestRequireAccessToken_WrongFormat() {
@@ -164,7 +166,7 @@ func (suite *OAuthMiddlewareSuite) TestRequireAccessToken_WrongFormat() {
   suite.handler.ServeHTTP(recorder, request)
 
   assert.Equal(suite.T(), http.StatusUnauthorized, recorder.Code)
-  assert.Equal(suite.T(), "", recorder.Body.String())
+  assert.Equal(suite.T(), ErrorText, recorder.Body.String())
 }
 
 func (suite *OAuthMiddlewareSuite) TestRequireAccessToken_WrongTokenType() {
@@ -178,7 +180,7 @@ func (suite *OAuthMiddlewareSuite) TestRequireAccessToken_WrongTokenType() {
   suite.handler.ServeHTTP(recorder, request)
 
   assert.Equal(suite.T(), http.StatusUnauthorized, recorder.Code)
-  assert.Equal(suite.T(), "", recorder.Body.String())
+  assert.Equal(suite.T(), ErrorText, recorder.Body.String())
 }
 
 func (suite *OAuthMiddlewareSuite) TestAddRefreshTokenToContext() {
@@ -251,7 +253,7 @@ func (suite *OAuthMiddlewareSuite) TestRequireRefreshToken_NoHeaderSent() {
   suite.handler.ServeHTTP(recorder, request)
 
   assert.Equal(suite.T(), http.StatusUnauthorized, recorder.Code)
-  assert.Equal(suite.T(), "", recorder.Body.String())
+  assert.Equal(suite.T(), ErrorText, recorder.Body.String())
 }
 
 func (suite *OAuthMiddlewareSuite) TestRequireRefreshToken_WrongFormat() {
@@ -262,7 +264,7 @@ func (suite *OAuthMiddlewareSuite) TestRequireRefreshToken_WrongFormat() {
   suite.handler.ServeHTTP(recorder, request)
 
   assert.Equal(suite.T(), http.StatusUnauthorized, recorder.Code)
-  assert.Equal(suite.T(), "", recorder.Body.String())
+  assert.Equal(suite.T(), ErrorText, recorder.Body.String())
 }
 
 func (suite *OAuthMiddlewareSuite) TestRequireRefreshToken_WrongTokenType() {
@@ -276,5 +278,5 @@ func (suite *OAuthMiddlewareSuite) TestRequireRefreshToken_WrongTokenType() {
   suite.handler.ServeHTTP(recorder, request)
 
   assert.Equal(suite.T(), http.StatusUnauthorized, recorder.Code)
-  assert.Equal(suite.T(), "", recorder.Body.String())
+  assert.Equal(suite.T(), ErrorText, recorder.Body.String())
 }
