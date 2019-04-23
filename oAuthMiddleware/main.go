@@ -1,74 +1,45 @@
 package oAuthMiddleware
 
 import (
-  "fmt"
   "context"
   "net/http"
   "github.com/renra/go-oauth-helpers/oAuthHelpers"
 )
 
-func AddAccessTokenToContext(next http.HandlerFunc) http.HandlerFunc {
-  return func (w http.ResponseWriter, r *http.Request) {
-    token, err := oAuthHelpers.GetAccessTokenFromHeaders(r.Header)
+type Middleware func(http.HandlerFunc) http.HandlerFunc
 
-    if err == nil {
-      ctx := r.Context()
+func AddToken(key string, tokenType string) Middleware {
+  return func (next http.HandlerFunc) http.HandlerFunc {
+    return func (w http.ResponseWriter, r *http.Request) {
+      token, err := oAuthHelpers.GetTokenFromHeaders(r.Header, tokenType)
 
-      r = r.WithContext(context.WithValue(ctx, "access_token", *token))
+      if err == nil {
+        ctx := r.Context()
 
-      next(w, r)
-    } else {
-      next(w, r)
+        r = r.WithContext(context.WithValue(ctx, key, *token))
+
+        next(w, r)
+      } else {
+        next(w, r)
+      }
     }
   }
 }
 
-func RequireAccessToken(next http.HandlerFunc) http.HandlerFunc {
-  return func (w http.ResponseWriter, r *http.Request) {
-    token, err := oAuthHelpers.GetAccessTokenFromHeaders(r.Header)
+func RequireToken(key string, tokenType string, errback http.HandlerFunc) Middleware {
+  return func (next http.HandlerFunc) http.HandlerFunc {
+    return func (w http.ResponseWriter, r *http.Request) {
+      token, err := oAuthHelpers.GetTokenFromHeaders(r.Header, tokenType)
 
-    if err == nil {
-      ctx := r.Context()
+      if err == nil {
+        ctx := r.Context()
 
-      r = r.WithContext(context.WithValue(ctx, "access_token", *token))
+        r = r.WithContext(context.WithValue(ctx, key, *token))
 
-      next(w, r)
-    } else {
-      w.WriteHeader(http.StatusUnauthorized)
-      fmt.Fprintf(w, "")
-    }
-  }
-}
-
-func AddRefreshTokenToContext(next http.HandlerFunc) http.HandlerFunc {
-  return func (w http.ResponseWriter, r *http.Request) {
-    token, err := oAuthHelpers.GetRefreshTokenFromHeaders(r.Header)
-
-    if err == nil {
-      ctx := r.Context()
-
-      r = r.WithContext(context.WithValue(ctx, "refresh_token", *token))
-
-      next(w, r)
-    } else {
-      next(w, r)
-    }
-  }
-}
-
-func RequireRefreshToken(next http.HandlerFunc) http.HandlerFunc {
-  return func (w http.ResponseWriter, r *http.Request) {
-    token, err := oAuthHelpers.GetRefreshTokenFromHeaders(r.Header)
-
-    if err == nil {
-      ctx := r.Context()
-
-      r = r.WithContext(context.WithValue(ctx, "refresh_token", *token))
-
-      next(w, r)
-    } else {
-      w.WriteHeader(http.StatusUnauthorized)
-      fmt.Fprintf(w, "")
+        next(w, r)
+      } else {
+        errback(w, r)
+      }
     }
   }
 }

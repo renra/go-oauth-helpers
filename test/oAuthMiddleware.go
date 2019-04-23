@@ -16,29 +16,57 @@ type TestHttpHandler struct {
 func (handler *TestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
   switch r.URL.Path {
   case "/you_can_send_me_access_token":
-    oAuthMiddleware.AddAccessTokenToContext(func (writer http.ResponseWriter, req *http.Request) {
-      maybeToken := req.Context().Value("access_token")
+    key := "access_token"
+
+    oAuthMiddleware.AddToken(
+      key,
+      oAuthHelpers.AccessTokenType,
+    )(func (writer http.ResponseWriter, req *http.Request) {
+      maybeToken := req.Context().Value(key)
       token, _ := maybeToken.(string)
 
       fmt.Fprintf(writer, "%s", token)
     })(w, r)
   case "/you_must_send_me_access_token":
-    oAuthMiddleware.RequireAccessToken(func (writer http.ResponseWriter, req *http.Request) {
-      maybeToken := req.Context().Value("access_token")
+    key := "access_token"
+
+    oAuthMiddleware.RequireToken(
+      key,
+      oAuthHelpers.AccessTokenType,
+      func (writer http.ResponseWriter, req *http.Request) {
+        w.WriteHeader(http.StatusUnauthorized)
+        fmt.Fprintf(w, "")
+      },
+    )(func (writer http.ResponseWriter, req *http.Request) {
+      maybeToken := req.Context().Value(key)
       token, _ := maybeToken.(string)
 
       fmt.Fprintf(writer, "%s", token)
     })(w, r)
   case "/you_can_send_me_refresh_token":
-    oAuthMiddleware.AddRefreshTokenToContext(func (writer http.ResponseWriter, req *http.Request) {
-      maybeToken := req.Context().Value("refresh_token")
+    key := "refresh_token"
+
+    oAuthMiddleware.AddToken(
+      key,
+      oAuthHelpers.RefreshTokenType,
+    )(func (writer http.ResponseWriter, req *http.Request) {
+      maybeToken := req.Context().Value(key)
       token, _ := maybeToken.(string)
 
       fmt.Fprintf(writer, "%s", token)
     })(w, r)
   case "/you_must_send_me_refresh_token":
-    oAuthMiddleware.RequireRefreshToken(func (writer http.ResponseWriter, req *http.Request) {
-      maybeToken := req.Context().Value("refresh_token")
+    key := "refresh_token"
+
+    oAuthMiddleware.RequireToken(
+      key,
+      oAuthHelpers.RefreshTokenType,
+      func (writer http.ResponseWriter, req *http.Request) {
+        w.WriteHeader(http.StatusUnauthorized)
+        fmt.Fprintf(w, "")
+      },
+    )(func (writer http.ResponseWriter, req *http.Request) {
+      maybeToken := req.Context().Value(key)
       token, _ := maybeToken.(string)
 
       fmt.Fprintf(writer, "%s", token)
