@@ -7,7 +7,6 @@ services:
       - SHELL=/bin/sh
     volumes:
       - ./oAuthHelpers/:/go/src/app/oAuthHelpers/
-      - ./oAuthMiddleware/:/go/src/app/oAuthMiddleware/
       - ./test/:/go/src/app/test/
       - ./Makefile:/go/src/app/Makefile
 
