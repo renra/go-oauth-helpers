@@ -1,9 +1,8 @@
-package oAuthMiddleware
+package oAuthHelpers
 
 import (
   "context"
   "net/http"
-  "github.com/renra/go-oauth-helpers/oAuthHelpers"
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
@@ -11,7 +10,7 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc
 func AddToken(key string, tokenType string) Middleware {
   return func (next http.HandlerFunc) http.HandlerFunc {
     return func (w http.ResponseWriter, r *http.Request) {
-      token, err := oAuthHelpers.GetTokenFromHeaders(r.Header, tokenType)
+      token, err := GetTokenFromHeaders(r.Header, tokenType)
 
       if err == nil {
         ctx := r.Context()
@@ -28,7 +27,7 @@ func AddToken(key string, tokenType string) Middleware {
 func RequireToken(key string, tokenType string, errback http.HandlerFunc) Middleware {
   return func (next http.HandlerFunc) http.HandlerFunc {
     return func (w http.ResponseWriter, r *http.Request) {
-      token, err := oAuthHelpers.GetTokenFromHeaders(r.Header, tokenType)
+      token, err := GetTokenFromHeaders(r.Header, tokenType)
 
       if err == nil {
         ctx := r.Context()
@@ -41,3 +40,4 @@ func RequireToken(key string, tokenType string, errback http.HandlerFunc) Middle
     }
   }
 }
+
